@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <cstring>
 using namespace std;
 
 int main(int argc, char** argv) {
@@ -398,7 +399,14 @@ int main(int argc, char** argv) {
        	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
-	system("docker build -t test-mpact-dev-env .");
-	system("docker save test-mpact-dev-env | gzip > test-mpact-dev-env.tar.gz");
+	string name = argv[4];
+	cout << name << endl;
+	string command = "docker build -t " + name + " .";	
+	system(command.c_str());
+	if (!strcmp(argv[5], "true")) {
+	  command = "docker save " + name + " | gzip > " + name + " .tar.gz";
+	  system(command.c_str());
+	  cout << "zipping!" << endl;
+ 	}
 }
 

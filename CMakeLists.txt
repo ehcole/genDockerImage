@@ -2,12 +2,21 @@ cmake_minimum_required (VERSION 2.8.12)
 project (genDockerImage)
 
 
+if ( NAME )
+   set (name ${NAME})
+endif()
+
+if ( ZIP )
+   set (zip "true")
+else()
+   set (zip "false")
+endif()
 
 set(genDockerfile_SOURCES genDockerfile.cpp)
 add_executable(cleanup cleanup.cpp)
 add_executable(genDockerfile genDockerfile.cpp)
 add_custom_target(genDockerfile_run
-	COMMAND genDockerfile ${GCC_VERSION} ${MPICH_VERSION} ${TPL_URL}
+	COMMAND genDockerfile ${GCC_VERSION} ${MPICH_VERSION} ${TPL_URL} ${name} ${zip}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	SOURCES ${genDockerfile_SOURCES}
 )

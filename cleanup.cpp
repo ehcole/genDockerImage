@@ -3,8 +3,8 @@
 #include <cstdlib>
 using namespace std;
 int main(int argc, char** argv) {
-  cout << "cleaning up..." << endl;
+  cout << "Cleaning up." << endl;
   std::remove(argv[0]);
-  system("rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake Makefile");
+  system("rm -rf CMakeFiles CMakeCache.txt cmake_install.cmake Makefile genDockerfile");
   return 0;
 }
