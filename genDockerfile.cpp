@@ -399,6 +399,6 @@ int main(int argc, char** argv) {
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
 	system("docker build -t test-mpact-dev-env .");
-	system("docker save test-mpact-dev-env | gzip > test-mpact-dev-env.tar.gz")
+	system("docker save test-mpact-dev-env | gzip > test-mpact-dev-env.tar.gz");
 }
 
