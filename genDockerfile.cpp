@@ -400,13 +400,11 @@ int main(int argc, char** argv) {
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
 	string name = argv[4];
-	cout << name << endl;
 	string command = "docker build -t " + name + " .";	
 	system(command.c_str());
 	if (!strcmp(argv[5], "true")) {
-	  command = "docker save " + name + " | gzip > " + name + " .tar.gz";
+	  command = "docker save " + name + " | gzip > " + name + ".tar.gz";
 	  system(command.c_str());
-	  cout << "zipping!" << endl;
  	}
 }
 

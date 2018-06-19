@@ -4,6 +4,8 @@ project (genDockerImage)
 
 if ( NAME )
    set (name ${NAME})
+else()
+   set (name "test-mpact-dev-env")
 endif()
 
 if ( ZIP )
