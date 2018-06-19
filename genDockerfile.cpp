@@ -7,12 +7,13 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	if (argc < 6) {
-		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL" << endl;
+	if (argc < 7) {
+		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL TPL_BUILD_DIR [NAME] [ZIP]" << endl;
 		return 1;
 	}
 	string gccVersion = argv[1];
 	string mpiVersion = argv[2];
+	string cmakeDir = "/scratch" + argv[4];
 	if (argv[1][0] != 'g') {
 	  cout << "GCC_VERSION should be of the form  \"gcc-x.y.z\"" << endl;
 	  cout << "Using default GCC_VERSION: gcc-6.4.0" << endl;
@@ -35,14 +36,7 @@ int main(int argc, char** argv) {
 	if (TPLs.find("git") == string::npos) {
 	  cout << "Invalid TPL_URL. Must be a git repo. Using default value: https://github.com/CASL/vera_tpls.git" << endl;
 	  TPLs = "https://github.com/CASL/vera_tpls.git";
-	}
-	//sets build directory for cmake to use when building mpact development environment.
-	//currently only supports use of vera_tpls or MPACT_tpls
-	//if another set of libraries is required, the correct build directory must be defined here as 
-	//"/scratch/path/to/build/dir
-	string cmakeDir = "/scratch/vera_tpls/TPL_build/";
-       	if (TPLs.find("vera") == string::npos) {
-	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
+	  cmakeDir = "/scratch/vera_tpls/TPL_build/";
 	}
 	/////begin writing Dockerfile
 	//setting variables/parameters
@@ -318,12 +312,12 @@ int main(int argc, char** argv) {
 	/////end writing Dockerfile
 
 	//builds docker image from Dockerfile
-	string name = argv[4];
+	string name = argv[5];
 	//full command: docker build -t NAME .
 	string command = "docker build -t " + name + " .";	
 	system(command.c_str());
-	//argv[5] is zip instruction. if true, executes system command to save docker image as a .tar.gz
-	if (!strcmp(argv[5], "true")) {
+	//argv[6] is zip instruction. if true, executes system command to save docker image as a .tar.gz
+	if (!strcmp(argv[6], "true")) {
 	  //full command: docker save NAME | gzip > NAME.tar.gz
 	  command = "docker save " + name + " | gzip > " + name + ".tar.gz";
 	  system(command.c_str());
