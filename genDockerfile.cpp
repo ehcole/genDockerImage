@@ -30,8 +30,12 @@ int main(int argc, char** argv) {
 	  mpiVersion = argv[2];
 	}
 	ofstream output;
-	output.open("dockerfile");
+	output.open("Dockerfile");
 	string TPLs = argv[3];	
+	if (TPLs.find("git") == string::npos) {
+	  cout << "Invalid TPL_URL. Must be a git repo. Using default value: https://github.com/CASL/vera_tpls.git" << endl;
+	  TPLs = "https://github.com/CASL/vera_tpls.git";
+	}
 	//sets build directory for cmake to use when building mpact development environment.
 	//currently only supports use of vera_tpls or MPACT_tpls
 	//if another set of libraries is required, the correct build directory must be defined here as 
