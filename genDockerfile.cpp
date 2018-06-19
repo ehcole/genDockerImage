@@ -284,7 +284,7 @@ int main(int argc, char** argv) {
 	output << "echo \'cmake  -D CMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/" << gccVersion << "/tpls/  -D CMAKE_BUILD_TYPE=Release  -D CMAKE_CXX_COMPILER=mpicxx  -D CMAKE_C_COMPILER=mpicc  -D CMAKE_Fortran_COMPILER=mpif90  -D FFLAGS=\"-fPIC -O3\"  -D CFLAGS=\"-fPIC -O3\"  -D CXXFLAGS=\"-fPIC -O3\"  -D LDFLAGS=\"\"  -D ENABLE_SHARED=ON  -D PROCS_INSTALL=8 " << cmakeDir << "\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'make -j8 || \' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'make -j8\' >> ${FINISH_BUILD} && \\"  << endl;
-       	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
+       	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake-3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
 	string name = argv[4];
