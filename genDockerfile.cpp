@@ -9,7 +9,6 @@ using namespace std;
 int main(int argc, char** argv) {
 	if (argc < 6) {
 		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL" << endl;
-		cerr << "Something went horribly wrong! Five command line arguments to genDockerfile should have been set in the cmake step" << endl;
 		return 1;
 	}
 	string gccVersion = argv[1];
