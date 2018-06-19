@@ -32,8 +32,15 @@ int main(int argc, char** argv) {
 	}
 	ofstream output;
 	output.open("dockerfile");
-	string TPLs = argv[3];
+	string TPLs = argv[3];	
+	//sets build directory for cmake to use when building mpact development environment.
+	//currently only supports use of vera_tpls or MPACT_tpls
+	//if another set of libraries is required, the correct build directory must be defined here as 
+	//"/scratch/path/to/build/dir
 	string cmakeDir = "/scratch/vera_tpls/TPL_build/";
+       	if (strstr(argv[3], "vera") == NULL) {
+	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
+	}
 	/////begin writing Dockerfile
 	//setting variables/parameters
 	output << "FROM centos:7" << endl;
@@ -50,7 +57,7 @@ int main(int argc, char** argv) {
 	output << "MKL=/etc/modulefiles/mkl/2018 \\ " << endl;
 	output << "FINISH_BUILD=/scratch/finishBuild.sh" << endl;
 
-	//beginning execution of docker build
+	//docker build commands begin here
 
 	//installing packages
 	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ "<< endl;
@@ -61,8 +68,6 @@ int main(int argc, char** argv) {
 	  output << "rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \\ " << endl;
 	  output << "yes | yum repolist && \\ " << endl;
 	  output << "yum install -y intel-mkl && \\ " << endl;
-	  //changes tpl build directory from vera MPACT_tpls
-	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
 	}
 	output << "yum group install \"Development Tools\" -y            		&&  \\ "<< endl;
 	output << "yum install valgrind cmake htop environment-modules -y &&  \\ "<< endl;
@@ -84,13 +89,14 @@ int main(int argc, char** argv) {
 	output << "yum install -y cmake						  &&  \\ "<< endl;
 	output << "export PATH=/usr/lib64/" + mpiVersion + "/bin:$PATH &&  \\ "<< endl;
 
-	//cloning TriBits
+	//cloning TriBITS
 	output << "git clone https://github.com/TriBITSPub/TriBITS.git &&  \\ "<< endl;
 	output << "mkdir -p ${DEVTOOL_INSTALL_DIR}/common_tools &&  \\ "<< endl;
 	output << "cp -r TriBITS/tribits/python_utils/gitdist  /opt/mpact-dev-env/common_tools/ &&   \\ "<< endl;
 
 	//installing anaconda3 and writing module file
 	output << "wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh	 &&  \\ "<< endl;
+	//this convoluted command interacts with the anaconda installation process
 	output << "(for i in {1..4}; do echo yes; done; echo no) | bash Anaconda3-5.1.0-Linux-x86_64.sh			    	&&  \\ "<< endl;
 	output << "mkdir -p /etc/modulefiles/python-anaconda3		 &&  \\ "<< endl;
 	output << "touch /etc/modulefiles/python-anaconda3/3.6.4		 &&  \\ " << endl;
@@ -161,7 +167,7 @@ int main(int argc, char** argv) {
 	output << "echo \"#Set the path to CMake/CTest/CPack\" >> ${CMAKE} &&  \\ "<< endl;
 	output << "echo \"prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\\$version/bin\" >> ${CMAKE}		&&  \\ "<< endl;
 	output << "rm -f cmake_3.3.*                         &&   \\ "<< endl;
-	//if using mkl, writing module file (argv[3] is tpl url)
+	//if using mkl, writing module file (argv[3] is tpl url. Presumably, if vera_tpl is not used, mkl is being used)
 	if (strstr(argv[3], "vera") == NULL) {
 		output << "mkdir -p /etc/modulefiles/mkl && \\ " << endl;
 		output << "touch /etc/modulefiles/mkl/2018 && \\ " << endl;
@@ -290,7 +296,7 @@ int main(int argc, char** argv) {
 	output << "sed -i \'s/Loads the development environment for MPACT./\"Loads the development environment for MPACT.\"/g\' " << gccVersion << " && \\" << endl;
 	output << "rm -f *GCC* && \\" << endl;
 	//writes script to complete image build. necessary for commands that must be run in an interactive shell
-	//namely, source activate and module load, which are necessary to run cmake and make
+	//namely, conda create, source activate, and module load, which are necessary to run cmake and make
 	output << "touch /scratch/finishBuild.sh && \\ " << endl;
 	output << "chmod 755 /scratch/finishBuild.sh && \\ " << endl;
 	output << "echo \'#!/bin/bash\' >> ${FINISH_BUILD} && \\ " << endl;
@@ -307,6 +313,8 @@ int main(int argc, char** argv) {
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
 	/////end writing Dockerfile
+
+	//builds docker image from Dockerfile
 	string name = argv[4];
 	//full command: docker build -t NAME .
 	string command = "docker build -t " + name + " .";	
