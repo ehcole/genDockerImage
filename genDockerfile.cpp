@@ -7,9 +7,10 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	if (argc < 4) {
+	if (argc < 6) {
 		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL" << endl;
-		return 0;
+		cerr << "Something went horribly wrong! Five command line arguments to genDockerfile should have been set in the cmake step" << endl;
+		return 1;
 	}
 	string gccVersion = argv[1];
 	string mpiVersion = argv[2];
@@ -33,12 +34,13 @@ int main(int argc, char** argv) {
 	output.open("dockerfile");
 	string TPLs = argv[3];
 	string cmakeDir = "/scratch/vera_tpls/TPL_build/";
+	/////begin writing Dockerfile
+	//setting variables/parameters
 	output << "FROM centos:7" << endl;
 	output << "ARG NPROC=2" << endl;
 	output << "WORKDIR /scratch" << endl;
 	output << "ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \\ "<< endl;
 	output << "GCC_VERSION=" + gccVersion + " \\ " << endl;
-	output << "PYTHON_2=/etc/modulefiles/python-anaconda2/2.7.14 		 \\ "<< endl;
 	output << "EXPECT_SH=expect.sh						 	\\ "<< endl;
 	output << "PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\\ "<< endl;
 	output << "CMAKE=/etc/modulefiles/cmake/3.3.2  \\ "<< endl;
@@ -47,13 +49,19 @@ int main(int argc, char** argv) {
 	output << "VERA_SCRATCH_DIR=/scratch/tmp \\ "<< endl;
 	output << "MKL=/etc/modulefiles/mkl/2018 \\ " << endl;
 	output << "FINISH_BUILD=/scratch/finishBuild.sh" << endl;
+
+	//beginning execution of docker build
+
+	//installing packages
 	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ "<< endl;
 	output << "yum update -y                                       		&&  \\ "<< endl;
+	//installs mkl packages if not using vera_tpls
 	if (strstr(argv[3], "vera") == NULL) {
 	  output << "yum-config-manager --add-repo https://yum.repos.intel.com/setup/intelproducts.repo && \\ " << endl;
 	  output << "rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \\ " << endl;
 	  output << "yes | yum repolist && \\ " << endl;
 	  output << "yum install -y intel-mkl && \\ " << endl;
+	  //changes tpl build directory from vera MPACT_tpls
 	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
 	}
 	output << "yum group install \"Development Tools\" -y            		&&  \\ "<< endl;
@@ -72,10 +80,16 @@ int main(int argc, char** argv) {
 	output << "yum install -y git	&&  \\ "<< endl;
 	output << "yum install -y wget		&&  \\ "<< endl;
 	output << "yum install -y bzip2	&&  \\ "<< endl;
+	output << "yum install openssl-devel	 -y				    &&  \\ "<< endl;
+	output << "yum install -y cmake						  &&  \\ "<< endl;
 	output << "export PATH=/usr/lib64/" + mpiVersion + "/bin:$PATH &&  \\ "<< endl;
+
+	//cloning TriBits
 	output << "git clone https://github.com/TriBITSPub/TriBITS.git &&  \\ "<< endl;
 	output << "mkdir -p ${DEVTOOL_INSTALL_DIR}/common_tools &&  \\ "<< endl;
 	output << "cp -r TriBITS/tribits/python_utils/gitdist  /opt/mpact-dev-env/common_tools/ &&   \\ "<< endl;
+
+	//installing anaconda3 and writing module file
 	output << "wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh	 &&  \\ "<< endl;
 	output << "(for i in {1..4}; do echo yes; done; echo no) | bash Anaconda3-5.1.0-Linux-x86_64.sh			    	&&  \\ "<< endl;
 	output << "mkdir -p /etc/modulefiles/python-anaconda3		 &&  \\ "<< endl;
@@ -126,8 +140,8 @@ int main(int argc, char** argv) {
 	output << "echo \"conflict python-anaconda2\" >> ${PYTHON_3}	     &&  \\ "<< endl;
 	output << "echo >> ${PYTHON_3} 						&&  \\ "<< endl;
 	output << "echo \"prereq mpi\" >> ${PYTHON_3}				&&  \\ "<< endl;
-	output << "yum install openssl-devel	 -y				    &&  \\ "<< endl;
-	output << "yum install -y cmake						  &&  \\ "<< endl;
+
+	//installing cmake and writing module file
 	output << "wget https://cmake.org/files/v3.3/cmake-3.3.2.tar.gz   &&  \\ "<< endl;
 	output << "tar -xvf cmake-3.3.2.tar.gz && cd cmake-3.3.2          &&  \\ "<< endl;
 	output << "cmake . -DCMAKE_USE_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/common_tools/cmake-3.3.2/					 &&  \\ "<< endl;
@@ -147,6 +161,7 @@ int main(int argc, char** argv) {
 	output << "echo \"#Set the path to CMake/CTest/CPack\" >> ${CMAKE} &&  \\ "<< endl;
 	output << "echo \"prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\\$version/bin\" >> ${CMAKE}		&&  \\ "<< endl;
 	output << "rm -f cmake_3.3.*                         &&   \\ "<< endl;
+	//if using mkl, writing module file (argv[3] is tpl url)
 	if (strstr(argv[3], "vera") == NULL) {
 		output << "mkdir -p /etc/modulefiles/mkl && \\ " << endl;
 		output << "touch /etc/modulefiles/mkl/2018 && \\ " << endl;
@@ -192,10 +207,10 @@ int main(int argc, char** argv) {
 		output << "echo \'prepend-path    LD_LIBRARY_PATH /opt/intel/mkl/lib/intel64\' >> ${MKL}         && \\ " << endl;
 		output << "echo \'prepend-path    LIBRARY_PATH /opt/intel/mkl/lib/intel64\' >> ${MKL} && \\ " << endl;
 	}
-	output << "mkdir -p /etc/modulefiles/PrgEnv/mpact-dev/ && \\" << endl;
-	output << "touch /etc/modulefiles/PrgEnv/mpact-dev/" << gccVersion << " && \\"<< endl;
+	//cloning TPLs
 	output << "cd /scratch && \\" << endl;
 	output << "git clone " << TPLs << " && \\" << endl;
+	//writing gcc module file
 	output << "mkdir -p /etc/modulefiles/PrgEnv/mpact-dev/ && \\" << endl;
 	output << "cd /etc/modulefiles/PrgEnv/mpact-dev/ && \\" << endl;
 	output << "touch " << gccVersion << " && \\" << endl;
@@ -270,9 +285,12 @@ int main(int argc, char** argv) {
 	output << "echo \"set-alias gitdist-status {gitdist dist-repo-status}\" >> ${GCC_VERSION} && \\" << endl;
 	output << "echo \"set-alias gitdist-mod {gitdist --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
 	output << "#echo \"set-alias gitdist-mod-status {gitdist dist-repo-status --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
+	//cleaning gcc module file (adding necessary quotation marks where echo commands weren't working)
 	output << "sed -i \'s/set name MPACT Development Environment - $version/set name \"MPACT Development Environment -$version\"/g\' " << gccVersion << " && \\" << endl; 
 	output << "sed -i \'s/Loads the development environment for MPACT./\"Loads the development environment for MPACT.\"/g\' " << gccVersion << " && \\" << endl;
 	output << "rm -f *GCC* && \\" << endl;
+	//writes script to complete image build. necessary for commands that must be run in an interactive shell
+	//namely, source activate and module load, which are necessary to run cmake and make
 	output << "touch /scratch/finishBuild.sh && \\ " << endl;
 	output << "chmod 755 /scratch/finishBuild.sh && \\ " << endl;
 	output << "echo \'#!/bin/bash\' >> ${FINISH_BUILD} && \\ " << endl;
@@ -282,15 +300,20 @@ int main(int argc, char** argv) {
 	output << "echo \'mkdir /scratch/tmp && cd /scratch/tmp\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'module load mpi\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'cmake  -D CMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/" << gccVersion << "/tpls/  -D CMAKE_BUILD_TYPE=Release  -D CMAKE_CXX_COMPILER=mpicxx  -D CMAKE_C_COMPILER=mpicc  -D CMAKE_Fortran_COMPILER=mpif90  -D FFLAGS=\"-fPIC -O3\"  -D CFLAGS=\"-fPIC -O3\"  -D CXXFLAGS=\"-fPIC -O3\"  -D LDFLAGS=\"\"  -D ENABLE_SHARED=ON  -D PROCS_INSTALL=8 " << cmakeDir << "\' >> ${FINISH_BUILD} && \\" << endl;
+	//the first make -j8 always fails, but the second one will succeed. 
 	output << "echo \'make -j8 || \' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'make -j8\' >> ${FINISH_BUILD} && \\"  << endl;
        	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake-3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
+	/////end writing Dockerfile
 	string name = argv[4];
+	//full command: docker build -t NAME .
 	string command = "docker build -t " + name + " .";	
 	system(command.c_str());
+	//argv[5] is zip instruction. if true, executes system command to save docker image as a .tar.gz
 	if (!strcmp(argv[5], "true")) {
+	  //full command: docker save NAME | gzip > NAME.tar.gz
 	  command = "docker save " + name + " | gzip > " + name + ".tar.gz";
 	  system(command.c_str());
  	}
