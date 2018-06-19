@@ -15,6 +15,7 @@ if ( NOT TPL_URL )
    set (TPL_URL "https://github.com/CASL/vera_tpls.git")
    message ("No TPL_URL specified. Using default: https://github.com/CASL/vera_tpls.git")
 endif()
+
 if ( NAME )
    set (name ${NAME})
 else()
