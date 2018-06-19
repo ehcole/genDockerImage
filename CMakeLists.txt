@@ -37,5 +37,4 @@ add_custom_target(genDockerfile_run
 	SOURCES ${genDockerfile_SOURCES}
 )
 add_dependencies(cleanup genDockerfile_run)
-set (clean_up "rm cleanup")
-execute_process (COMMAND clean_up)
+
