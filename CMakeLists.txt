@@ -13,7 +13,7 @@ endif()
 
 if ( NOT TPL_URL )
    set (TPL_URL "https://github.com/CASL/vera_tpls.git")
-   set (TPL_BUILD_DIR "/vera_tpls/TPL_build")
+   set (TPL_BUILD_DIR "/vera_tpls/TPL_build/")
    message ("No TPL_URL specified. Using default: https://github.com/CASL/vera_tpls.git")
 elseif ( NOT TPL_BUILD_DIR )
    message (FATAL_ERROR "TPL_BUILD_DIR not specified. Aborting.")

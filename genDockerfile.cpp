@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
 	string mpiVersion = argv[2];
 	string argv4 = argv[4];
 	string cmakeDir;
-	if (argv4[1] != '/') {
-	  cmakeDir= "/scratch/" + argv4;
+	if (argv4[0] != '/') {
+	  cmakeDir = "/scratch/" + argv4;
 	}
 	else {
 	  cmakeDir = "/scratch" + argv4;
