@@ -7,65 +7,48 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-
 	if (argc < 4) {
 		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL" << endl;
 		return 0;
 	}
-
+	string gccVersion = argv[1];
+	string mpiVersion = argv[2];
 	if (argv[1][0] != 'g') {
 	  cout << "GCC_VERSION should be of the form  \"gcc-x.y.z\"" << endl;
-	  return 0;
+	  cout << "Using default GCC_VERSION: gcc-6.4.0" << endl;
+	  gccVersion = "gcc-6.4.0";
 	}
-
+	else {
+	  gccVersion = argv[1];
+	}
 	if (strstr(argv[2], "mpich") == NULL && strstr(argv[2], "mvapich") == NULL) {
 	  cout << "MPI_VERSION should be of the form \"mpich-x.y\" or \"mvapich2-x.y\"" << endl;
-	  return 0;
+	  cout << "Using default MPI_VERSION: mvapich2-2.0" << endl;
+	  mpiVersion = "mvapich2-2.0";
 	}
-	
+	else {
+	  mpiVersion = argv[2];
+	}
 	ofstream output;
 	output.open("dockerfile");
-
-	string gccVersion = argv[1];
-
-	string mpiVersion = argv[2];
-
 	string TPLs = argv[3];
-	
 	string cmakeDir = "/scratch/vera_tpls/TPL_build/";
-
 	output << "FROM centos:7" << endl;
-
 	output << "ARG NPROC=2" << endl;
-
 	output << "WORKDIR /scratch" << endl;
-
 	output << "ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \\ "<< endl;
-
 	output << "GCC_VERSION=" + gccVersion + " \\ " << endl;
-
 	output << "PYTHON_2=/etc/modulefiles/python-anaconda2/2.7.14 		 \\ "<< endl;
-
 	output << "EXPECT_SH=expect.sh						 	\\ "<< endl;
-
 	output << "PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\\ "<< endl;
-
 	output << "CMAKE=/etc/modulefiles/cmake/3.3.2  \\ "<< endl;
-
 	output << "MPI_VERSION=" + mpiVersion + "  \\ "<< endl;
-
 	output << "VERA_TPL_INSTALL_DIR=/opt/mpact-dev-env/" + gccVersion + "/tpls/ \\ "<< endl;
-
 	output << "VERA_SCRATCH_DIR=/scratch/tmp \\ "<< endl;
-
 	output << "MKL=/etc/modulefiles/mkl/2018 \\ " << endl;
-
 	output << "FINISH_BUILD=/scratch/finishBuild.sh" << endl;
-
 	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ "<< endl;
-
 	output << "yum update -y                                       		&&  \\ "<< endl;
-
 	if (strstr(argv[3], "vera") == NULL) {
 	  output << "yum-config-manager --add-repo https://yum.repos.intel.com/setup/intelproducts.repo && \\ " << endl;
 	  output << "rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \\ " << endl;
@@ -73,195 +56,100 @@ int main(int argc, char** argv) {
 	  output << "yum install -y intel-mkl && \\ " << endl;
 	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
 	}
-
 	output << "yum group install \"Development Tools\" -y            		&&  \\ "<< endl;
-
 	output << "yum install valgrind cmake htop environment-modules -y &&  \\ "<< endl;
-
 	output << "yum install latexmk doxygen-latex texlive-titling texinfo texlive-titlesec -y 		&&  \\ "<< endl;
-
 	output << "yum install libXext-devel -y						&&  \\ "<< endl;
-
 	output << "yum install python papi-devel -y						&&  \\ "<< endl;
-
 	output << "yum install " + mpiVersion + "-devel -y						&&  \\ "<< endl;
-
 	output << "yum install hwloc-devel.x86_64	-y					&&  \\ "<< endl;
-
 	output << "yum install libibmad-devel.x86_64 -y					&&  \\ "<< endl;
-
 	output << "yum install -y valgrind cmake graphviz \\ "<< endl;
-
 	output << "htop environment-modules   \\ "<< endl;
-
 	output << "vim nano emacs  \\ "<< endl;
-
 	output << "libXext-devel  \\ "<< endl;
-
 	output << "python \\ "<< endl;
-
 	output << "yum install -y git	&&  \\ "<< endl;
-
 	output << "yum install -y wget		&&  \\ "<< endl;
-
 	output << "yum install -y bzip2	&&  \\ "<< endl;
-
 	output << "export PATH=/usr/lib64/" + mpiVersion + "/bin:$PATH &&  \\ "<< endl;
-
 	output << "git clone https://github.com/TriBITSPub/TriBITS.git &&  \\ "<< endl;
-
 	output << "mkdir -p ${DEVTOOL_INSTALL_DIR}/common_tools &&  \\ "<< endl;
-
 	output << "cp -r TriBITS/tribits/python_utils/gitdist  /opt/mpact-dev-env/common_tools/ &&   \\ "<< endl;
-
 	output << "wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh	 &&  \\ "<< endl;
-
 	output << "(for i in {1..4}; do echo yes; done; echo no) | bash Anaconda3-5.1.0-Linux-x86_64.sh			    	&&  \\ "<< endl;
-
 	output << "mkdir -p /etc/modulefiles/python-anaconda3		 &&  \\ "<< endl;
-
-	output << "touch /etc/modulefiles/python-anaconda3/3.6.4		 &&  \\ "<< endl;
-
-	output << "echo \"#%Module\" >> ${PYTHON_3}					&&  \\ "<< endl;
-
+	output << "touch /etc/modulefiles/python-anaconda3/3.6.4		 &&  \\ " << endl;
+	output << "echo \"#%Module\" >> ${PYTHON_3}					&&  \\ " << endl;
 	output << "echo \"set version 3.6.4\" >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \'set name \"Anaconda distribution of Python - \\$version\"\' >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo \'set msg \"\"\' >> ${PYTHON_3}				&&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo \"proc ModulesHelp { } {\" >> ${PYTHON_3}		&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"Anaconda Python 3 Distribution\"\' >> ${PYTHON_3}								&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"\"\' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"The Anaconda Python 3 distribution is a completely free, enterprise-ready Python\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"distribution for large-scale data processing, predictive analytics, and\"\' >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"scientific computing.  This software module contains the commercially licensed,\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"accelerated versions of MKL, NumPy, SciPy, NumbaPro, and CUDA for Python; it\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"also has the commercial IOPro package which loads NumPy arrays (and Pandas\"\' >> ${PYTHON_3}		&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"DataFrames) directly from files, SQL databases, and NoSQL stores, without\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"creating millions of temporary, intermediate Python objects, or requiring\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"expensive array resizing operations; IOPro provides a drop-in replacement for\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"the NumPy functions loadtxt() and genfromtxt(), but drastically improves\"\' >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"\"' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"To create your own Python environment using this module, see\"\' >> ${PYTHON_3}				&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"http://conda.pydata.org/docs/using/envs.html\"\' >> ${PYTHON_3}	 &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"\"\' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"In addition to installing Python packages into your own Python environment\"\' >> ${PYTHON_3}	     &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"using the \"conda install\" command as described on the web page above, you\"\' >> ${PYTHON_3}  &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"can install Python packages using the \"pip\" command.  For example, to install\"\' >> ${PYTHON_3}     &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"a Python package named \"Foo\", run\"\' >> ${PYTHON_3}				      &&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"\"' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"    pip install Foo --user\"\' >> ${PYTHON_3} 										&&  \\ "<< endl;
-
 	output << "echo \' puts stderr \"\" }\' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"Name: Anaconda Python 3\"\' >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"Description: Python 3 distribution for scientific computing, including accelerated commercial versions of several Python packages.\"\' >> ${PYTHON_3}		&&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"License information: Academic Cluster License, https://docs.continuum.io/anaconda/eula\"\' >> ${PYTHON_3} 										&&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"Category: Python, programming, scripting, numpy, scipy, matplotlib, biopython, astropy, IPython, Jupyter\"\' >> ${PYTHON_3}	     	&&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"Package documentation: https://docs.continuum.io/\"\' >> ${PYTHON_3}			&&  \\ "<< endl;
-
 	output << "echo \'module-whatis \"Version: \\$version\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo \"#Set the paths & vars for Anaconda\" >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \"set root /opt/mpact-dev-env/common_tools/anaconda3\" >> ${PYTHON_3}	&&  \\ "<< endl;
-
 	output << "echo \"prepend-path PATH          \\$root/bin\" >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \"prepend-path MANPATH       \\$root/man\" >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo \"setenv       ANACONDA_ROOT \\$root\" >> ${PYTHON_3} &&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3}						&&  \\ "<< endl;
-
 	output << "echo \"conflict python-anaconda2\" >> ${PYTHON_3}	     &&  \\ "<< endl;
-
 	output << "echo >> ${PYTHON_3} 						&&  \\ "<< endl;
-
 	output << "echo \"prereq mpi\" >> ${PYTHON_3}				&&  \\ "<< endl;
-
 	output << "yum install openssl-devel	 -y				    &&  \\ "<< endl;
-
 	output << "yum install -y cmake						  &&  \\ "<< endl;
-
 	output << "wget https://cmake.org/files/v3.3/cmake-3.3.2.tar.gz   &&  \\ "<< endl;
-
 	output << "tar -xvf cmake-3.3.2.tar.gz && cd cmake-3.3.2          &&  \\ "<< endl;
-
 	output << "cmake . -DCMAKE_USE_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/common_tools/cmake-3.3.2/					 &&  \\ "<< endl;
-
 	output << "make -j8 install							 &&  \\ "<< endl;
-
 	output << "mkdir -p /etc/modulefiles/cmake				 &&  \\ "<< endl;
-
 	output << "touch /etc/modulefiles/cmake/3.3.2				 &&  \\ "<< endl;
-
 	output << "echo \"#%Module\" >> ${CMAKE}					&&  \\ "<< endl;
-
 	output << "echo \"set version 3.3.2\" >> ${CMAKE}				&&  \\ "<< endl;
-
 	output << "echo \'set name \"MPACT Development Environment - 2.1.0\"\' >> ${CMAKE} &&  \\ "<< endl;
-
 	output << "echo \'set msg \"Loads the development environment for MPACT.\"\' >> ${CMAKE}	&&  \\ "<< endl;
-
 	output << "echo >> ${CMAKE}							&&  \\ "<< endl;
-
 	output << "echo \"proc ModulesHelp { } {\" >> ${CMAKE}			&&  \\ "<< endl;
-
 	output << "echo \" puts stderr \\$msg}\" >> ${CMAKE}			&&  \\ "<< endl;
-
 	output << "echo >> ${CMAKE}							&&  \\ "<< endl;
-
 	output << "echo \"module-whatis  \\$msg\" >> ${CMAKE}			&&  \\ "<< endl;
-
 	output << "echo >> ${CMAKE}							&&  \\ "<< endl;
-
 	output << "echo \"#Set the path to CMake/CTest/CPack\" >> ${CMAKE} &&  \\ "<< endl;
-
 	output << "echo \"prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\\$version/bin\" >> ${CMAKE}		&&  \\ "<< endl;
-
 	output << "rm -f cmake_3.3.*                         &&   \\ "<< endl;
-
 	if (strstr(argv[3], "vera") == NULL) {
-
 		output << "mkdir -p /etc/modulefiles/mkl && \\ " << endl;
-
 		output << "touch /etc/modulefiles/mkl/2018 && \\ " << endl;
-
 		output << "echo \"#%Module\" >> ${MKL}                  && \\ " << endl;
 		output << "echo \"proc ModulesHelp {} {\" >> ${MKL}                      && \\ " << endl;
 		output << "echo \"\t global version modroot\" >> ${MKL}         && \\ " << endl;
