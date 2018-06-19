@@ -13,7 +13,14 @@ int main(int argc, char** argv) {
 	}
 	string gccVersion = argv[1];
 	string mpiVersion = argv[2];
-	string cmakeDir = "/scratch" + argv[4];
+	string argv4 = argv[4];
+	string cmakeDir;
+	if (argv4[1] != '/') {
+	  cmakeDir= "/scratch/" + argv4;
+	}
+	else {
+	  cmakeDir = "/scratch" + argv4;
+	}
 	if (argv[1][0] != 'g') {
 	  cout << "GCC_VERSION should be of the form  \"gcc-x.y.z\"" << endl;
 	  cout << "Using default GCC_VERSION: gcc-6.4.0" << endl;
