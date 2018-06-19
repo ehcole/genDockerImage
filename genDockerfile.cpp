@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	//if another set of libraries is required, the correct build directory must be defined here as 
 	//"/scratch/path/to/build/dir
 	string cmakeDir = "/scratch/vera_tpls/TPL_build/";
-       	if (strstr(argv[3], "vera") == NULL) {
+       	if (TPLs.find("vera") == string::npos) {
 	  cmakeDir = "/scratch/MPACT_tpls/TPL_build/";
 	}
 	/////begin writing Dockerfile
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ "<< endl;
 	output << "yum update -y                                       		&&  \\ "<< endl;
 	//installs mkl packages if not using vera_tpls
-	if (strstr(argv[3], "vera") == NULL) {
+	if (TPLs.find("vera") == string::npos) {
 	  output << "yum-config-manager --add-repo https://yum.repos.intel.com/setup/intelproducts.repo && \\ " << endl;
 	  output << "rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \\ " << endl;
 	  output << "yes | yum repolist && \\ " << endl;
@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
 	output << "echo \"prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\\$version/bin\" >> ${CMAKE}		&&  \\ "<< endl;
 	output << "rm -f cmake_3.3.*                         &&   \\ "<< endl;
 	//if using mkl, writing module file (argv[3] is tpl url. Presumably, if vera_tpl is not used, mkl is being used)
-	if (strstr(argv[3], "vera") == NULL) {
+	if (TPLs.find("vera") == string::npos) {
 		output << "mkdir -p /etc/modulefiles/mkl && \\ " << endl;
 		output << "touch /etc/modulefiles/mkl/2018 && \\ " << endl;
 		output << "echo \"#%Module\" >> ${MKL}                  && \\ " << endl;
