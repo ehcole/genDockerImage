@@ -315,7 +315,26 @@ int main(int argc, char** argv) {
 	output << "echo \'make -j8\' >> ${FINISH_BUILD} && \\"  << endl;
        	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake-3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
-	output << "/bin/bash -i /scratch/finishBuild.sh" << endl;
+	output << "/bin/bash -i /scratch/finishBuild.sh && \\" << endl;
+	output << "yum install redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
+	output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
+	output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
+	output << "cd gcc-builder && \\" << endl;
+	output << "git checkout gcc" << gccVersion[4] << " && \\" << endl;;
+	string versionNumber;
+	string versionNumNoDots;
+	for (int i = 4; i < gccVersion.length(); ++i) {
+	  versionNumber += gccVersion[i];
+	  if (gccVersion[i] != '.') {
+	    versionNumNoDots += gccVersion[i];
+	  }
+	}
+	output << "sed -i \'s/GCC_VERSION=" << gccVersion[4] << ".X.0/GCC_VERSION=" << versionNumber << "/g\' ./gcc-build-vars.sh && \\" << endl;
+	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/build-gcc.sh -T && \\" << endl;
+	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/stage-gcc.sh && \\" << endl;
+	output << "export PATH=/usr/local/gcc/" << versionNumber << "/bin:$PATH && \\" << endl;
+	output << "export LD_LIBRARY_PATH=/usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64:$LD_LIBRARY_PATH && \\" << endl;
+	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh" << endl;
 	/////end writing Dockerfile
 
 	//builds docker image from Dockerfile
