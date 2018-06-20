@@ -29,6 +29,15 @@ int main(int argc, char** argv) {
 	else {
 	  gccVersion = argv[1];
 	}
+	string versionNumber;
+	string versionNumNoDots;
+	for (int i = 4; i < gccVersion.length(); ++i) {
+	  versionNumber += gccVersion[i];
+	  if (gccVersion[i] != '.') {
+	    versionNumNoDots += gccVersion[i];
+	  }
+	}
+
 	if (strstr(argv[2], "mpich") == NULL && strstr(argv[2], "mvapich") == NULL) {
 	  cout << "MPI_VERSION should be of the form \"mpich-x.y\" or \"mvapich2-x.y\"" << endl;
 	  cout << "Using default MPI_VERSION: mvapich2-2.0" << endl;
@@ -295,6 +304,8 @@ int main(int argc, char** argv) {
 	output << "echo \"set-alias gitdist-status {gitdist dist-repo-status}\" >> ${GCC_VERSION} && \\" << endl;
 	output << "echo \"set-alias gitdist-mod {gitdist --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
 	output << "#echo \"set-alias gitdist-mod-status {gitdist dist-repo-status --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
+	output << "echo \"prepend-path PATH /usr/local/gcc/" << versionNumber << "/bin\" >> ${GCC_VERSION} && \\" << endl;
+	output << "echo \"prepend-path LD_LIBRARY_PATH /usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64:$LD_LIBRARY_PATH\" >> ${GCC_VERSION} && \\" << endl;
 	//cleaning gcc module file (adding necessary quotation marks where echo commands weren't working)
 	output << "sed -i \'s/set name MPACT Development Environment - $version/set name \"MPACT Development Environment -$version\"/g\' " << gccVersion << " && \\" << endl; 
 	output << "sed -i \'s/Loads the development environment for MPACT./\"Loads the development environment for MPACT.\"/g\' " << gccVersion << " && \\" << endl;
@@ -321,20 +332,14 @@ int main(int argc, char** argv) {
 	output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
 	output << "cd gcc-builder && \\" << endl;
 	output << "git checkout gcc" << gccVersion[4] << " && \\" << endl;;
-	string versionNumber;
-	string versionNumNoDots;
-	for (int i = 4; i < gccVersion.length(); ++i) {
-	  versionNumber += gccVersion[i];
-	  if (gccVersion[i] != '.') {
-	    versionNumNoDots += gccVersion[i];
-	  }
-	}
-	output << "sed -i \'s/GCC_VERSION=" << gccVersion[4] << ".X.0/GCC_VERSION=" << versionNumber << "/g\' ./gcc-build-vars.sh && \\" << endl;
+	output << "sed -i \'s/GCC_VERSION=" << gccVersion[4] << ".X.0/GCC_VERSION=" << versionNumber << "/g\' gcc-build-vars.sh && \\" << endl;
 	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/build-gcc.sh -T && \\" << endl;
 	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/stage-gcc.sh && \\" << endl;
-	output << "export PATH=/usr/local/gcc/" << versionNumber << "/bin:$PATH && \\" << endl;
-	output << "export LD_LIBRARY_PATH=/usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64:$LD_LIBRARY_PATH && \\" << endl;
-	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh" << endl;
+	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/pack-gcc.sh && \\" << endl;
+	output << "tar -zxvf ./packages/kewb-gcc" << versionNumNoDots << "-CentOS-7-x86_64.tgz -C / && \\" << endl;
+	output << "source /usr/local/bin/setenv-for-gcc" << versionNumNoDots << ".sh && \\" << endl;
+	output << "/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh && \\" << endl;
+	output << "cd /scratch && rm -rf buildGCC" << endl;
 	/////end writing Dockerfile
 
 	//builds docker image from Dockerfile
