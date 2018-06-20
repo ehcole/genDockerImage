@@ -316,7 +316,7 @@ int main(int argc, char** argv) {
        	output << "echo \'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake-3.3.* && yum clean all\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh && \\" << endl;
-	output << "yum install redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
+	output << "yum install -y redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
 	output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
 	output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
 	output << "cd gcc-builder && \\" << endl;
