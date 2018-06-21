@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	if (argc < 7) {
-		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL TPL_BUILD_DIR [NAME] [ZIP]" << endl;
+		cout << "usage: ./genDockerfile GCC_VERSION MPI_VERSION TPL_URL TPL_BUILD_DIR NAME ZIP" << endl;
 		return 1;
 	}
 	string gccVersion = argv[1];
