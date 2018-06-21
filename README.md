@@ -2,7 +2,7 @@ Generates a Dockerfile from which to build an MPACT development environment. Exp
 
 Usage: cmake [-D GCC_VERSION=] [-D MPI_VERSION=] [-D TPL_URL= -D TPL_BUILD_DIR= ] [-D NAME=] [-D ZIP=]; make
 
-GCC_VERSION: if specified, must be of the form gcc-x.y.z. Default value is "gcc-6.4.0"
+GCC_VERSION: if specified, must be of the form gcc-x.y.z or just x.y.z. Default value is "gcc-6.4.0"
 
 MPI_VERSION: if specified, must be of the form mpich-x.y or mvapich2-x.y. Default value is "mvapich2-2.0"
 

@@ -22,9 +22,14 @@ int main(int argc, char** argv) {
 	  cmakeDir = "/scratch" + argv4;
 	}
 	if (argv[1][0] != 'g') {
-	  cout << "GCC_VERSION should be of the form  \"gcc-x.y.z\"" << endl;
-	  cout << "Using default GCC_VERSION: gcc-6.4.0" << endl;
-	  gccVersion = "gcc-6.4.0";
+	  if (gccVersion.length() == 5 && gccVersion[1] == '.' && gccVersion[3] == '.') {
+	    gccVersion = "gcc-" + gccVersion;
+	  }
+	  else {
+	    cout << "GCC_VERSION should be of the form  \"gcc-x.y.z\" or \"x.y.z\'" << endl;
+	    cout << "Using default GCC_VERSION: gcc-6.4.0" << endl;
+	    gccVersion = "gcc-6.4.0";
+	  }
 	}
 	else {
 	  gccVersion = argv[1];
@@ -37,7 +42,6 @@ int main(int argc, char** argv) {
 	    versionNumNoDots += gccVersion[i];
 	  }
 	}
-
 	if (strstr(argv[2], "mpich") == NULL && strstr(argv[2], "mvapich") == NULL) {
 	  cout << "MPI_VERSION should be of the form \"mpich-x.y\" or \"mvapich2-x.y\"" << endl;
 	  cout << "Using default MPI_VERSION: mvapich2-2.0" << endl;
