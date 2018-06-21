@@ -13,14 +13,10 @@ int main(int argc, char** argv) {
 	}
 	string gccVersion = argv[1];
 	string mpiVersion = argv[2];
-	string argv4 = argv[4];
+	string build_dir = argv[4];
 	string cmakeDir;
-	if (argv4[0] != '/') {
-	  cmakeDir = "/scratch/" + argv4;
-	}
-	else {
-	  cmakeDir = "/scratch" + argv4;
-	}
+	string versionNumber;
+	string versionNumNoDots;
 	if (argv[1][0] != 'g') {
 	  if (gccVersion.length() == 5 && gccVersion[1] == '.' && gccVersion[3] == '.') {
 	    gccVersion = "gcc-" + gccVersion;
@@ -34,8 +30,6 @@ int main(int argc, char** argv) {
 	else {
 	  gccVersion = argv[1];
 	}
-	string versionNumber;
-	string versionNumNoDots;
 	for (int i = 4; i < gccVersion.length(); ++i) {
 	  versionNumber += gccVersion[i];
 	  if (gccVersion[i] != '.') {
@@ -50,14 +44,20 @@ int main(int argc, char** argv) {
 	else {
 	  mpiVersion = argv[2];
 	}
-	ofstream output;
-	output.open("Dockerfile");
+	if (build_dir[0] != '/') {
+	  cmakeDir = "/scratch/" + build_dir;
+	}
+	else {
+	  cmakeDir = "/scratch" + build_dir;
+	}
 	string TPLs = argv[3];	
 	if (TPLs.find("git") == string::npos) {
 	  cout << "Invalid TPL_URL. Must be a git repo. Using default value: https://github.com/CASL/vera_tpls.git" << endl;
 	  TPLs = "https://github.com/CASL/vera_tpls.git";
 	  cmakeDir = "/scratch/vera_tpls/TPL_build/";
 	}
+	ofstream output;
+	output.open("Dockerfile");
 	/////begin writing Dockerfile
 	//setting variables/parameters
 	output << "FROM centos:7" << endl;
