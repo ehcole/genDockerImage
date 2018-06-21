@@ -63,21 +63,21 @@ int main(int argc, char** argv) {
 	output << "FROM centos:7" << endl;
 	output << "ARG NPROC=2" << endl;
 	output << "WORKDIR /scratch" << endl;
-	output << "ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \\ "<< endl;
+	output << "ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \\ " << endl;
 	output << "GCC_VERSION=" + gccVersion + " \\ " << endl;
-	output << "PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\\ "<< endl;
-	output << "CMAKE=/etc/modulefiles/cmake/3.3.2  \\ "<< endl;
-	output << "MPI_VERSION=" + mpiVersion + "  \\ "<< endl;
-	output << "VERA_TPL_INSTALL_DIR=/opt/mpact-dev-env/" + gccVersion + "/tpls/ \\ "<< endl;
-	output << "VERA_SCRATCH_DIR=/scratch/tmp \\ "<< endl;
+	output << "PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\\ " << endl;
+	output << "CMAKE=/etc/modulefiles/cmake/3.3.2  \\ " << endl;
+	output << "MPI_VERSION=" + mpiVersion + "  \\ " << endl;
+	output << "VERA_TPL_INSTALL_DIR=/opt/mpact-dev-env/" + gccVersion + "/tpls/ \\ " << endl;
+	output << "VERA_SCRATCH_DIR=/scratch/tmp \\ " << endl;
 	output << "MKL=/etc/modulefiles/mkl/2018 \\ " << endl;
 	output << "FINISH_BUILD=/scratch/finishBuild.sh" << endl;
 
 	//docker build commands begin here
 
 	//installing packages
-	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ "<< endl;
-	output << "yum update -y                                       		&&  \\ "<< endl;
+	output << "RUN yum install -y epel-release && yum repolist       		&&  \\ " << endl;
+	output << "yum update -y                                       		&&  \\ " << endl;
 	//installs mkl packages if not using vera_tpls
 	if (TPLs.find("vera") == string::npos) {
 	  output << "yum-config-manager --add-repo https://yum.repos.intel.com/setup/intelproducts.repo && \\ " << endl;
@@ -85,15 +85,15 @@ int main(int argc, char** argv) {
 	  output << "yes | yum repolist && \\ " << endl;
 	  output << "yum install -y intel-mkl && \\ " << endl;
 	}
-	output << "yum group install \"Development Tools\" -y            		&&  \\ "<< endl;
-	output << "yum install valgrind cmake htop environment-modules -y &&  \\ "<< endl;
-	output << "yum install latexmk doxygen-latex texlive-titling texinfo texlive-titlesec -y 		&&  \\ "<< endl;
-	output << "yum install libXext-devel -y						&&  \\ "<< endl;
-	output << "yum install python papi-devel -y						&&  \\ "<< endl;
-	output << "yum install " + mpiVersion + "-devel -y						&&  \\ "<< endl;
-	output << "yum install hwloc-devel.x86_64	-y					&&  \\ "<< endl;
-	output << "yum install libibmad-devel.x86_64 -y					&&  \\ "<< endl;
-	output << "yum install -y valgrind cmake graphviz \\ "<< endl;
+	output << "yum group install \"Development Tools\" -y            		&&  \\ " << endl;
+	output << "yum install valgrind cmake htop environment-modules -y &&  \\ " << endl;
+	output << "yum install latexmk doxygen-latex texlive-titling texinfo texlive-titlesec -y 		&&  \\ " << endl;
+	output << "yum install libXext-devel -y						&&  \\ " << endl;
+	output << "yum install python papi-devel -y						&&  \\ " << endl;
+	output << "yum install " + mpiVersion + "-devel -y						&&  \\ " << endl;
+	output << "yum install hwloc-devel.x86_64	-y					&&  \\ " << endl;
+	output << "yum install libibmad-devel.x86_64 -y					&&  \\ " << endl;
+	output << "yum install -y valgrind cmake graphviz \\ " << endl;
 	output << "htop environment-modules   \\ "<< endl;
 	output << "vim nano emacs  \\ "<< endl;
 	output << "libXext-devel  \\ "<< endl;
