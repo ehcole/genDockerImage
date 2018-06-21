@@ -130,6 +130,7 @@ int main(int argc, char** argv) {
 	output << "echo \' puts stderr \"creating millions of temporary, intermediate Python objects, or requiring\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
 	output << "echo \' puts stderr \"expensive array resizing operations; IOPro provides a drop-in replacement for\"\' >> ${PYTHON_3}	&&  \\ "<< endl;
 	output << "echo \' puts stderr \"the NumPy functions loadtxt() and genfromtxt(), but drastically improves\"\' >> ${PYTHON_3} &&  \\ "<< endl;
+	output << "echo \' puts stderr \"performance and reduces the memory overhead.\"\' >> ${PYTHON_3} && \\" << endl;
 	output << "echo \' puts stderr \"\"' >> ${PYTHON_3}			&&  \\ "<< endl;
 	output << "echo \' puts stderr \"To create your own Python environment using this module, see\"\' >> ${PYTHON_3}				&&  \\ "<< endl;
 	output << "echo \' puts stderr \"http://conda.pydata.org/docs/using/envs.html\"\' >> ${PYTHON_3}	 &&  \\ "<< endl;
