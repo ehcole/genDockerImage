@@ -10,7 +10,7 @@ TPL_URL: if specified, must be the url of a git repository containing TPLs to bu
 
 TPL_BUILD_DIR: must be specified if TPL_URL is specified. Path to TPL_build directory within TPL git repo. E.g., if vera_tpls are used, TPL_BUILD_DIR should be "/vera_tpls/TPL_build/". That is the default value if TPL_URL is not specified.
 
-NAME: Default value is "test-mpact-dev-env"
+NAME: Name of docker image. Must be all lower-case. Default value is "test-mpact-dev-env"
 
 ZIP: If set, saves the docker image as gzipped NAME.tar.gz. False by default
 

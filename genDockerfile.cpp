@@ -61,7 +61,6 @@ int main(int argc, char** argv) {
 	output << "WORKDIR /scratch" << endl;
 	output << "ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \\ "<< endl;
 	output << "GCC_VERSION=" + gccVersion + " \\ " << endl;
-	output << "EXPECT_SH=expect.sh						 	\\ "<< endl;
 	output << "PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\\ "<< endl;
 	output << "CMAKE=/etc/modulefiles/cmake/3.3.2  \\ "<< endl;
 	output << "MPI_VERSION=" + mpiVersion + "  \\ "<< endl;
@@ -181,7 +180,7 @@ int main(int argc, char** argv) {
 	output << "echo \"#Set the path to CMake/CTest/CPack\" >> ${CMAKE} &&  \\ "<< endl;
 	output << "echo \"prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\\$version/bin\" >> ${CMAKE}		&&  \\ "<< endl;
 	output << "rm -f cmake_3.3.*                         &&   \\ "<< endl;
-	//if using mkl, writing module file (argv[3] is tpl url. Presumably, if vera_tpl is not used, mkl is being used)
+	//if using mkl, writing module file (Presumably, if vera_tpl is not used, mkl is being used)
 	if (TPLs.find("vera") == string::npos) {
 		output << "mkdir -p /etc/modulefiles/mkl && \\ " << endl;
 		output << "touch /etc/modulefiles/mkl/2018 && \\ " << endl;
@@ -329,6 +328,7 @@ int main(int argc, char** argv) {
 	output << "echo \'exit || exit\' >> ${FINISH_BUILD} && \\" << endl;
 	output << "/bin/bash -i /scratch/finishBuild.sh && \\" << endl;
 	output << "yum install -y redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
+	//installing specified version of GCC
 	output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
 	output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
 	output << "cd gcc-builder && \\" << endl;
