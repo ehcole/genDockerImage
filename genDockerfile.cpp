@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
   output << "echo \"set-alias gitdist-mod {gitdist --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
   output << "#echo \"set-alias gitdist-mod-status {gitdist dist-repo-status --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
   output << "echo \"prepend-path PATH /usr/local/gcc/" << versionNumber << "/bin\" >> ${GCC_VERSION} && \\" << endl;
-  output << "echo \"prepend-path LD_LIBRARY_PATH /usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64:$LD_LIBRARY_PATH\" >> ${GCC_VERSION} && \\" << endl;
+  output << "echo \"prepend-path LD_LIBRARY_PATH /usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64\" >> ${GCC_VERSION} && \\" << endl;
   //cleaning gcc module file (adding necessary quotation marks where echo commands weren't working)
   output << "sed -i \'s/set name MPACT Development Environment - $version/set name \"MPACT Development Environment -$version\"/g\' " << gccVersion << " && \\" << endl; 
   output << "sed -i \'s/Loads the development environment for MPACT./\"Loads the development environment for MPACT.\"/g\' " << gccVersion << " && \\" << endl;
