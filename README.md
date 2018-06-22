@@ -1,4 +1,4 @@
-Generates a Dockerfile from which to build an MPACT development environment. Expect it to take 5-6 hours to run to completion.
+Generates a Dockerfile from which to build an MPACT development environment. Expect it to take 10-11 hours to run to completion.
 
 Usage: cmake [-D GCC_VERSION=] [-D MPI_VERSION=] [-D TPL_URL= -D TPL_BUILD_DIR= ] [-D NAME=] [-D ZIP=]; make
 
