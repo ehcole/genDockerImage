@@ -340,7 +340,7 @@ int main(int argc, char** argv) {
   output << "yum install -y redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
   //installing specified version of GCC
   if (gccVersion == "gcc-4.9.3") {
-    output << "cd scratch && \\" << endl;
+    output << "cd /scratch && \\" << endl;
     output << "wget https://ftp.gnu.org/gnu/gcc/gcc-4.9.3/gcc-4.9.3.tar.gz && \\" << endl;
     output << "tar xzf gcc-4.9.3.tar.gz && \\" << endl;
     output << "cd gcc-4.9.3 && \\" << endl;
