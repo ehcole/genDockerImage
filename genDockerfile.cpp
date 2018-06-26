@@ -308,8 +308,14 @@ int main(int argc, char** argv) {
   output << "echo \"set-alias gitdist-status {gitdist dist-repo-status}\" >> ${GCC_VERSION} && \\" << endl;
   output << "echo \"set-alias gitdist-mod {gitdist --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
   output << "#echo \"set-alias gitdist-mod-status {gitdist dist-repo-status --dist-mod-only}\" >> ${GCC_VERSION} && \\" << endl;
-  output << "echo \"prepend-path PATH /usr/local/gcc/" << versionNumber << "/bin\" >> ${GCC_VERSION} && \\" << endl;
-  output << "echo \"prepend-path LD_LIBRARY_PATH /usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64\" >> ${GCC_VERSION} && \\" << endl;
+  if (gccVersion == "gcc-4.9.3") {
+    output << "echo \"prepend-path PATH $HOME/gcc-4.9.3/bin\" >> ${GCC_VERSION} && \\" << endl;
+    output << "echo \"prepend-path LD_LIBRARY_PATH $HOME/gcc-4.9.3/lib:$HOME/gcc-4.9.3/lib64\" >> ${GCC_VERSION} && \\" << endl;
+  }
+  else {
+    output << "echo \"prepend-path PATH /usr/local/gcc/" << versionNumber << "/bin\" >> ${GCC_VERSION} && \\" << endl;
+    output << "echo \"prepend-path LD_LIBRARY_PATH /usr/local/gcc/" << versionNumber << "/lib:/usr/local/gcc/" << versionNumber << "/lib64\" >> ${GCC_VERSION} && \\" << endl;
+  }
   //cleaning gcc module file (adding necessary quotation marks where echo commands weren't working)
   output << "sed -i \'s/set name MPACT Development Environment - $version/set name \"MPACT Development Environment -$version\"/g\' " << gccVersion << " && \\" << endl; 
   output << "sed -i \'s/Loads the development environment for MPACT./\"Loads the development environment for MPACT.\"/g\' " << gccVersion << " && \\" << endl;
@@ -333,18 +339,33 @@ int main(int argc, char** argv) {
   output << "/bin/bash -i /scratch/finishBuild.sh && \\" << endl;
   output << "yum install -y redhat-lsb rpm-build rpm-sign check dejagnu expect && \\" << endl;
   //installing specified version of GCC
-  output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
-  output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
-  output << "cd gcc-builder && \\" << endl;
-  output << "git checkout gcc" << gccVersion[4] << " && \\" << endl;;
-  output << "sed -i \'s/GCC_VERSION=" << gccVersion[4] << ".X.0/GCC_VERSION=" << versionNumber << "/g\' gcc-build-vars.sh && \\" << endl;
-  output << "/bin/bash -i /scratch/buildGCC/gcc-builder/build-gcc.sh -T && \\" << endl;
-  output << "/bin/bash -i /scratch/buildGCC/gcc-builder/stage-gcc.sh && \\" << endl;
-  output << "/bin/bash -i /scratch/buildGCC/gcc-builder/pack-gcc.sh && \\" << endl;
-  output << "tar -zxvf ./packages/kewb-gcc" << versionNumNoDots << "-CentOS-7-x86_64.tgz -C / && \\" << endl;
-  output << "source /usr/local/bin/setenv-for-gcc" << versionNumNoDots << ".sh && \\" << endl;
-  output << "/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh && \\" << endl;
-  output << "cd /scratch && rm -rf buildGCC" << endl;
+  if (gccVersion == "gcc-4.9.3") {
+    output << "cd scratch && \\" << endl;
+    output << "wget https://ftp.gnu.org/gnu/gcc/gcc-4.9.3/gcc-4.9.3.tar.gz && \\" << endl;
+    output << "tar xzf gcc-4.9.3.tar.gz && \\" << endl;
+    output << "cd gcc-4.9.3 && \\" << endl;
+    output << "/bin/bash -i /scratch/gcc-4.9.3/contrib/download_prerequisites && \\" << endl;
+    output << "mkdir /scratch/objdir && cd /scratch/objdir && \\" << endl;
+    output << "/bin/bash -i /scratch/gcc-4.9.3/configure --prefix=$HOME/gcc-4.9.3 --enable-languages=c,c++,fortran --disable-multilib && \\" << endl;
+    output << "make -j8 && \\" << endl;
+    output << "make install -j8 && \\" << endl;
+    output << "rm -rf ~/objdir && \\" << endl;
+    output << "rm -rf ~/gcc-4.9.3.tar.gz" << endl;
+  }
+  else {
+    output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
+    output << "git clone https://gitlab.com/BobSteagall/gcc-builder.git && \\" << endl;
+    output << "cd gcc-builder && \\" << endl;
+    output << "git checkout gcc" << gccVersion[4] << " && \\" << endl;;
+    output << "sed -i \'s/GCC_VERSION=" << gccVersion[4] << ".X.0/GCC_VERSION=" << versionNumber << "/g\' gcc-build-vars.sh && \\" << endl;
+    output << "/bin/bash -i /scratch/buildGCC/gcc-builder/build-gcc.sh -T && \\" << endl;
+    output << "/bin/bash -i /scratch/buildGCC/gcc-builder/stage-gcc.sh && \\" << endl;
+    output << "/bin/bash -i /scratch/buildGCC/gcc-builder/pack-gcc.sh && \\" << endl;
+    output << "tar -zxvf ./packages/kewb-gcc" << versionNumNoDots << "-CentOS-7-x86_64.tgz -C / && \\" << endl;
+    output << "source /usr/local/bin/setenv-for-gcc" << versionNumNoDots << ".sh && \\" << endl;
+    output << "/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh && \\" << endl;
+    output << "cd /scratch && rm -rf buildGCC && yum clean all" << endl;
+  }
   /////end writing Dockerfile
   
   //builds docker image from Dockerfile
