@@ -349,8 +349,8 @@ int main(int argc, char** argv) {
     output << "/bin/bash -i /scratch/gcc-4.9.3/configure --prefix=$HOME/gcc-4.9.3 --enable-languages=c,c++,fortran --disable-multilib && \\" << endl;
     output << "make -j8 && \\" << endl;
     output << "make install -j8 && \\" << endl;
-    output << "rm -rf ~/objdir && \\" << endl;
-    output << "rm -rf ~/gcc-4.9.3.tar.gz" << endl;
+    output << "rm -rf /scratch/objdir && \\" << endl;
+    output << "rm -rf /scratch/gcc-4.9.3*" << endl;
   }
   else {
     output << "mkdir /scratch/buildGCC && cd /scratch/buildGCC && \\" << endl;
