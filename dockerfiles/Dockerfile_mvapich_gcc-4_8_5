@@ -1,0 +1,214 @@
+FROM centos:7
+ARG NPROC=2
+WORKDIR /scratch
+ENV DEVTOOL_INSTALL_DIR=/opt/mpact-dev-env  \ 
+GCC_VERSION=gcc-4.8.5 \ 
+PYTHON_3=/etc/modulefiles/python-anaconda3/3.6.4  		\ 
+CMAKE=/etc/modulefiles/cmake/3.3.2  \ 
+MPI_VERSION=mvapich2-2.0  \ 
+VERA_TPL_INSTALL_DIR=/opt/mpact-dev-env/gcc-4.8.5/tpls/ \ 
+VERA_SCRATCH_DIR=/scratch/tmp \ 
+MKL=/etc/modulefiles/mkl/2018 \ 
+FINISH_BUILD=/scratch/finishBuild.sh
+RUN yum install -y epel-release && yum repolist       		&&  \ 
+yum update -y                                       		&&  \ 
+yum group install "Development Tools" -y            		&&  \ 
+yum install valgrind cmake htop environment-modules -y &&  \ 
+yum install latexmk doxygen-latex texlive-titling texinfo texlive-titlesec -y 		&&  \ 
+yum install libXext-devel -y						&&  \ 
+yum install python papi-devel -y						&&  \ 
+yum install mvapich2-2.0-devel -y						&&  \ 
+yum install hwloc-devel.x86_64	-y					&&  \ 
+yum install libibmad-devel.x86_64 -y					&&  \ 
+yum install -y valgrind cmake graphviz \ 
+htop environment-modules   \ 
+vim nano emacs  \ 
+libXext-devel  \ 
+python \ 
+yum install -y git	&&  \ 
+yum install -y wget		&&  \ 
+yum install -y bzip2	&&  \ 
+yum install openssl-devel	 -y				    &&  \ 
+yum install -y cmake						  &&  \ 
+export PATH=/usr/lib64/mvapich2-2.0/bin:$PATH &&  \ 
+git clone https://github.com/TriBITSPub/TriBITS.git &&  \ 
+mkdir -p ${DEVTOOL_INSTALL_DIR}/common_tools &&  \ 
+cp -r TriBITS/tribits/python_utils/gitdist  /opt/mpact-dev-env/common_tools/ &&   \ 
+wget https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh	 &&  \ 
+(for i in {1..4}; do echo yes; done; echo no) | bash Anaconda3-5.1.0-Linux-x86_64.sh			    	&&  \ 
+mkdir -p /etc/modulefiles/python-anaconda3		 &&  \ 
+touch /etc/modulefiles/python-anaconda3/3.6.4		 &&  \ 
+echo "#%Module" >> ${PYTHON_3}					&&  \ 
+echo "set version 3.6.4" >> ${PYTHON_3}			&&  \ 
+echo 'set name "Anaconda distribution of Python - \$version"' >> ${PYTHON_3}						&&  \ 
+echo 'set msg ""' >> ${PYTHON_3}				&&  \ 
+echo >> ${PYTHON_3}						&&  \ 
+echo "proc ModulesHelp { } {" >> ${PYTHON_3}		&&  \ 
+echo ' puts stderr "Anaconda Python 3 Distribution"' >> ${PYTHON_3}								&&  \ 
+echo ' puts stderr ""' >> ${PYTHON_3}			&&  \ 
+echo ' puts stderr "The Anaconda Python 3 distribution is a completely free, enterprise-ready Python"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "distribution for large-scale data processing, predictive analytics, and"' >> ${PYTHON_3} &&  \ 
+echo ' puts stderr "scientific computing.  This software module contains the commercially licensed,"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "accelerated versions of MKL, NumPy, SciPy, NumbaPro, and CUDA for Python; it"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "also has the commercial IOPro package which loads NumPy arrays (and Pandas"' >> ${PYTHON_3}		&&  \ 
+echo ' puts stderr "DataFrames) directly from files, SQL databases, and NoSQL stores, without"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "creating millions of temporary, intermediate Python objects, or requiring"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "expensive array resizing operations; IOPro provides a drop-in replacement for"' >> ${PYTHON_3}	&&  \ 
+echo ' puts stderr "the NumPy functions loadtxt() and genfromtxt(), but drastically improves"' >> ${PYTHON_3} &&  \ 
+echo ' puts stderr "performance and reduces the memory overhead."' >> ${PYTHON_3} && \
+echo ' puts stderr ""' >> ${PYTHON_3}			&&  \ 
+echo ' puts stderr "To create your own Python environment using this module, see"' >> ${PYTHON_3}				&&  \ 
+echo ' puts stderr "http://conda.pydata.org/docs/using/envs.html"' >> ${PYTHON_3}	 &&  \ 
+echo ' puts stderr ""' >> ${PYTHON_3}			&&  \ 
+echo ' puts stderr "In addition to installing Python packages into your own Python environment"' >> ${PYTHON_3}	     &&  \ 
+echo ' puts stderr "using the "conda install" command as described on the web page above, you"' >> ${PYTHON_3}  &&  \ 
+echo ' puts stderr "can install Python packages using the "pip" command.  For example, to install"' >> ${PYTHON_3}     &&  \ 
+echo ' puts stderr "a Python package named "Foo", run"' >> ${PYTHON_3}				      &&  \ 
+echo ' puts stderr ""' >> ${PYTHON_3}			&&  \ 
+echo ' puts stderr "    pip install Foo --user"' >> ${PYTHON_3} 										&&  \ 
+echo ' puts stderr "" }' >> ${PYTHON_3}			&&  \ 
+echo >> ${PYTHON_3}						&&  \ 
+echo 'module-whatis "Name: Anaconda Python 3"' >> ${PYTHON_3} &&  \ 
+echo 'module-whatis "Description: Python 3 distribution for scientific computing, including accelerated commercial versions of several Python packages."' >> ${PYTHON_3}		&&  \ 
+echo 'module-whatis "License information: Academic Cluster License, https://docs.continuum.io/anaconda/eula"' >> ${PYTHON_3} 										&&  \ 
+echo 'module-whatis "Category: Python, programming, scripting, numpy, scipy, matplotlib, biopython, astropy, IPython, Jupyter"' >> ${PYTHON_3}	     	&&  \ 
+echo 'module-whatis "Package documentation: https://docs.continuum.io/"' >> ${PYTHON_3}			&&  \ 
+echo 'module-whatis "Version: \$version"' >> ${PYTHON_3}	&&  \ 
+echo >> ${PYTHON_3}						&&  \ 
+echo >> ${PYTHON_3}						&&  \ 
+echo "#Set the paths & vars for Anaconda" >> ${PYTHON_3} &&  \ 
+echo "set root /opt/mpact-dev-env/common_tools/anaconda3" >> ${PYTHON_3}	&&  \ 
+echo "prepend-path PATH          \$root/bin" >> ${PYTHON_3} &&  \ 
+echo "prepend-path MANPATH       \$root/man" >> ${PYTHON_3} &&  \ 
+echo "setenv       ANACONDA_ROOT \$root" >> ${PYTHON_3} &&  \ 
+echo >> ${PYTHON_3}						&&  \ 
+echo "conflict python-anaconda2" >> ${PYTHON_3}	     &&  \ 
+echo >> ${PYTHON_3} 						&&  \ 
+echo "prereq mpi" >> ${PYTHON_3}				&&  \ 
+wget https://cmake.org/files/v3.3/cmake-3.3.2.tar.gz   &&  \ 
+tar -xvf cmake-3.3.2.tar.gz && cd cmake-3.3.2          &&  \ 
+cmake . -DCMAKE_USE_OPENSSL=ON -DCMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/common_tools/cmake-3.3.2/					 &&  \ 
+make -j8 install							 &&  \ 
+mkdir -p /etc/modulefiles/cmake				 &&  \ 
+touch /etc/modulefiles/cmake/3.3.2				 &&  \ 
+echo "#%Module" >> ${CMAKE}					&&  \ 
+echo "set version 3.3.2" >> ${CMAKE}				&&  \ 
+echo 'set name "MPACT Development Environment - 2.1.0"' >> ${CMAKE} &&  \ 
+echo 'set msg "Loads the development environment for MPACT."' >> ${CMAKE}	&&  \ 
+echo >> ${CMAKE}							&&  \ 
+echo "proc ModulesHelp { } {" >> ${CMAKE}			&&  \ 
+echo " puts stderr \$msg}" >> ${CMAKE}			&&  \ 
+echo >> ${CMAKE}							&&  \ 
+echo "module-whatis  \$msg" >> ${CMAKE}			&&  \ 
+echo >> ${CMAKE}							&&  \ 
+echo "#Set the path to CMake/CTest/CPack" >> ${CMAKE} &&  \ 
+echo "prepend-path PATH /opt/mpact-dev-env/common_tools/cmake-\$version/bin" >> ${CMAKE}		&&  \ 
+rm -f cmake_3.3.*                         &&   \ 
+cd /scratch && \
+git clone https://github.com/CASL/vera_tpls && \
+mkdir -p /etc/modulefiles/PrgEnv/mpact-dev/ && \
+cd /etc/modulefiles/PrgEnv/mpact-dev/ && \
+touch gcc-4.8.5 && \
+echo "#%Module" >> ${GCC_VERSION} && \
+echo  >> ${GCC_VERSION} && \
+echo "set root ${DEVTOOL_INSTALL_DIR}" >> ${GCC_VERSION} && \
+echo  "set version ${GCC_VERSION}" >> ${GCC_VERSION} && \
+echo "set tpldir ${VERA_TPL_INSTALL_DIR}" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "set name ""MPACT Development Environment - \$version""" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "set msg ""Loads the development environment for MPACT.""" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "proc ModulesHelp { } {" >> ${GCC_VERSION} && \
+echo " puts stderr \$msg" >> ${GCC_VERSION} && \
+echo "}" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "module-whatis \$msg" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "if ![ is-loaded 'mpi/mvapich2-2.0-x86_64'] {" >> ${GCC_VERSION} && \
+echo '	module load mpi/mvapich2-2.0-x86_64' >> ${GCC_VERSION} && \
+echo "}" >> ${GCC_VERSION} && \
+echo "if ![ is-loaded 'cmake/3.3.2'] {" >> ${GCC_VERSION} && \
+echo '	module load cmake/3.3.2' >> ${GCC_VERSION} && \
+echo "}" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "setenv TRIBITS_DEV_ENV_BASE \$root" >> ${GCC_VERSION} && \
+echo "setenv TRIBITS_DEV_ENV_GCC_VERSION \$version" >> ${GCC_VERSION} && \
+echo "setenv TRIBITS_DEV_ENV_COMPILER_BASE \$root/\$version" >> ${GCC_VERSION} && \
+echo "#setenv TRIBITS_DEV_ENV_GCC_DIR" >> ${GCC_VERSION} && \
+echo "setenv TRIBITS_DEV_ENV_MPICH_DIR \$env(MPI_HOME)" >> ${GCC_VERSION} && \
+echo "setenv LOADED_TRIBITS_DEV_ENV \$version" >> ${GCC_VERSION} && \
+echo "setenv LOADED_VERA_DEV_ENV \$version" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "prepend-path PATH \$root/common_tools" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "#HDF5" >> ${GCC_VERSION} && \
+echo "set tplpath \$tpldir/hdf5-1.8.10" >> ${GCC_VERSION} && \
+echo "setenv HDF5_ROOT \$tplpath" >> ${GCC_VERSION} && \
+echo "prepend-path PATH \$tplpath/bin" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo "prepend-path INCLUDE \$tplpath/include" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "#BLAS/LAPACK" >> ${GCC_VERSION} && \
+echo "set tplpath \$tpldir/lapack-3.3.1" >> ${GCC_VERSION} && \
+echo "setenv BLAS_ROOT \$tplpath" >> ${GCC_VERSION} && \
+echo "setenv LAPACK_DIR \$tplpath" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION}&& \
+echo "#HYPRE" >> ${GCC_VERSION} && \
+echo "set tplpath \$tpldir/hypre-2.9.1a" >> ${GCC_VERSION} && \
+echo "setenv HYPRE_DIR \$tplpath" >> ${GCC_VERSION} >> ${FINISH_BUILD} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "#PETSC" >> ${GCC_VERSION} && \
+echo "set tplpath \$tpldir/petsc-3.5.4" >> ${GCC_VERSION} && \
+echo "setenv PETSC_DIR \$tplpath" >> ${GCC_VERSION} && \
+echo "# setenv PETSC_ARCH linux-gnu-opt" >> ${GCC_VERSION} && \
+echo "prepend-path PATH \$tplpath/bin" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo >> \${GCC_VERSION} && \
+echo "#SLEPC" >> ${GCC_VERSION} && \
+echo "set tplpath \$tpldir/slepc-3.5.4" >> ${GCC_VERSION} && \
+echo "setenv SLEPC_DIR \$tplpath" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "#SUNDIALS"\ >> ${GCC_VERSION} && \ 
+echo "set tplpath \$tpldir/sundials-2.9.0" >> ${GCC_VERSION} && \
+echo "setenv SUNDIALS_DIR \$tplpath" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH \$tplpath/lib" >> ${GCC_VERSION} && \
+echo >> ${GCC_VERSION} && \
+echo "set-alias gitdist-status {gitdist dist-repo-status}" >> ${GCC_VERSION} && \
+echo "set-alias gitdist-mod {gitdist --dist-mod-only}" >> ${GCC_VERSION} && \
+#echo "set-alias gitdist-mod-status {gitdist dist-repo-status --dist-mod-only}" >> ${GCC_VERSION} && \
+echo "prepend-path PATH /usr/local/gcc/4.8.5/bin" >> ${GCC_VERSION} && \
+echo "prepend-path LD_LIBRARY_PATH /usr/local/gcc/4.8.5/lib:/usr/local/gcc/4.8.5/lib64" >> ${GCC_VERSION} && \
+sed -i 's/set name MPACT Development Environment - $version/set name "MPACT Development Environment -$version"/g' gcc-4.8.5 && \
+sed -i 's/Loads the development environment for MPACT./"Loads the development environment for MPACT."/g' gcc-4.8.5 && \
+rm -f *GCC* && \
+touch /scratch/finishBuild.sh && \ 
+chmod 755 /scratch/finishBuild.sh && \ 
+echo '#!/bin/bash' >> ${FINISH_BUILD} && \ 
+echo 'echo 'y' | conda create -n Python27 python=2.7' >> ${FINISH_BUILD} && \
+echo 'source activate Python27' >> ${FINISH_BUILD} && \
+echo 'module load cmake' >> ${FINISH_BUILD} && \
+echo 'mkdir /scratch/tmp && cd /scratch/tmp' >> ${FINISH_BUILD} && \
+echo 'module load mpi' >> ${FINISH_BUILD} && \
+echo 'cmake  -D CMAKE_INSTALL_PREFIX=/opt/mpact-dev-env/gcc-4.8.5/tpls/  -D CMAKE_BUILD_TYPE=Release  -D CMAKE_CXX_COMPILER=mpicxx  -D CMAKE_C_COMPILER=mpicc  -D CMAKE_Fortran_COMPILER=mpif90  -D FFLAGS="-fPIC -O3"  -D CFLAGS="-fPIC -O3"  -D CXXFLAGS="-fPIC -O3"  -D LDFLAGS=""  -D ENABLE_SHARED=ON  -D PROCS_INSTALL=8 /scratch/vera_tpls/TPL_build' >> ${FINISH_BUILD} && \
+echo 'make -j8 || ' >> ${FINISH_BUILD} && \
+echo 'make -j8' >> ${FINISH_BUILD} && \
+echo 'cd /scratch && rm -rf tmp *_tpls TriBITS finishBuild.sh cmake-3.3.* && yum clean all' >> ${FINISH_BUILD} && \
+echo 'exit || exit' >> ${FINISH_BUILD} && \
+/bin/bash -i /scratch/finishBuild.sh && \
+yum install -y redhat-lsb rpm-build rpm-sign check dejagnu expect && \
+mkdir /scratch/buildGCC && cd /scratch/buildGCC && \
+git clone https://gitlab.com/BobSteagall/gcc-builder.git && \
+cd gcc-builder && \
+git checkout gcc4 && \
+sed -i 's/GCC_VERSION=4.X.0/GCC_VERSION=4.8.5/g' gcc-build-vars.sh && \
+/bin/bash -i /scratch/buildGCC/gcc-builder/build-gcc.sh -T && \
+/bin/bash -i /scratch/buildGCC/gcc-builder/stage-gcc.sh && \
+/bin/bash -i /scratch/buildGCC/gcc-builder/pack-gcc.sh && \
+tar -zxvf ./packages/kewb-gcc485-CentOS-7-x86_64.tgz -C / && \
+source /usr/local/bin/setenv-for-gcc485.sh && \
+/bin/bash -i /scratch/buildGCC/gcc-builder/clean-gcc.sh && \
+cd /scratch && rm -rf buildGCC && yum clean all
